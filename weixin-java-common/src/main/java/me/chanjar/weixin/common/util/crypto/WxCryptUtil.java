@@ -1,39 +1,45 @@
 package me.chanjar.weixin.common.util.crypto;
 
-import org.apache.commons.codec.binary.Base64;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.InputSource;
-
+import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Random;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.StringReader;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Random;
+
+import org.apache.commons.codec.binary.Base64;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
 
 /**
+ * <pre>
  * 对公众平台发送给公众账号的消息加解密示例代码.
- *
- * @copyright Copyright (c) 1998-2014 Tencent Inc.
+ * Copyright (c) 1998-2014 Tencent Inc.
  * 针对org.apache.commons.codec.binary.Base64，
  * 需要导入架包commons-codec-1.9（或commons-codec-1.8等其他版本）
  * 官方下载地址：http://commons.apache.org/proper/commons-codec/download_codec.cgi
+ * </pre>
+ *
+ * @author Tencent
  */
 public class WxCryptUtil {
 
-  private static final Base64 base64 = new Base64();
-  private static final Charset CHARSET = Charset.forName("utf-8");
+  private static final Base64 BASE64 = new Base64();
+  private static final Charset CHARSET = StandardCharsets.UTF_8;
 
-  private static final ThreadLocal<DocumentBuilder> builderLocal = new ThreadLocal<DocumentBuilder>() {
+  private static final ThreadLocal<DocumentBuilder> BUILDER_LOCAL = new ThreadLocal<DocumentBuilder>() {
     @Override
     protected DocumentBuilder initialValue() {
       try {
-        return DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setExpandEntityReferences(false);
+        return factory.newDocumentBuilder();
       } catch (ParserConfigurationException exc) {
         throw new IllegalArgumentException(exc);
       }
@@ -45,7 +51,6 @@ public class WxCryptUtil {
   protected String appidOrCorpid;
 
   public WxCryptUtil() {
-    super();
   }
 
   /**
@@ -64,7 +69,7 @@ public class WxCryptUtil {
 
   static String extractEncryptPart(String xml) {
     try {
-      DocumentBuilder db = builderLocal.get();
+      DocumentBuilder db = BUILDER_LOCAL.get();
       Document document = db.parse(new InputSource(new StringReader(xml)));
 
       Element root = document.getDocumentElement();
@@ -76,8 +81,6 @@ public class WxCryptUtil {
 
   /**
    * 将一个数字转换成生成4个字节的网络字节序bytes数组
-   *
-   * @param number
    */
   private static byte[] number2BytesInNetworkOrder(int number) {
     byte[] orderBytes = new byte[4];
@@ -90,8 +93,6 @@ public class WxCryptUtil {
 
   /**
    * 4个字节的网络字节序bytes数组还原成一个数字
-   *
-   * @param bytesInNetworkOrder
    */
   private static int bytesNetworkOrder2Number(byte[] bytesInNetworkOrder) {
     int sourceNumber = 0;
@@ -108,7 +109,7 @@ public class WxCryptUtil {
   private static String genRandomStr() {
     String base = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     Random random = new Random();
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     for (int i = 0; i < 16; i++) {
       int number = random.nextInt(base.length());
       sb.append(base.charAt(number));
@@ -150,12 +151,11 @@ public class WxCryptUtil {
     String encryptedXml = encrypt(genRandomStr(), plainText);
 
     // 生成安全签名
-    String timeStamp = Long.toString(System.currentTimeMillis() / 1000l);
+    String timeStamp = Long.toString(System.currentTimeMillis() / 1000L);
     String nonce = genRandomStr();
 
     String signature = SHA1.gen(this.token, timeStamp, nonce, encryptedXml);
-    String result = generateXml(encryptedXml, signature, timeStamp, nonce);
-    return result;
+    return generateXml(encryptedXml, signature, timeStamp, nonce);
   }
 
   /**
@@ -168,8 +168,7 @@ public class WxCryptUtil {
     ByteGroup byteCollector = new ByteGroup();
     byte[] randomStringBytes = randomStr.getBytes(CHARSET);
     byte[] plainTextBytes = plainText.getBytes(CHARSET);
-    byte[] bytesOfSizeInNetworkOrder = number2BytesInNetworkOrder(
-      plainTextBytes.length);
+    byte[] bytesOfSizeInNetworkOrder = number2BytesInNetworkOrder(plainTextBytes.length);
     byte[] appIdBytes = this.appidOrCorpid.getBytes(CHARSET);
 
     // randomStr + networkBytesOrder + text + appid
@@ -196,9 +195,7 @@ public class WxCryptUtil {
       byte[] encrypted = cipher.doFinal(unencrypted);
 
       // 使用BASE64对加密后的字符串进行编码
-      String base64Encrypted = base64.encodeToString(encrypted);
-
-      return base64Encrypted;
+      return BASE64.encodeToString(encrypted);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -230,8 +227,7 @@ public class WxCryptUtil {
     }
 
     // 解密
-    String result = decrypt(cipherText);
-    return result;
+    return decrypt(cipherText);
   }
 
   /**
@@ -259,7 +255,7 @@ public class WxCryptUtil {
       throw new RuntimeException(e);
     }
 
-    String xmlContent, from_appid;
+    String xmlContent, fromAppid;
     try {
       // 去除补位字符
       byte[] bytes = PKCS7Encoder.decode(original);
@@ -271,14 +267,14 @@ public class WxCryptUtil {
 
       xmlContent = new String(Arrays.copyOfRange(bytes, 20, 20 + xmlLength),
         CHARSET);
-      from_appid = new String(
+      fromAppid = new String(
         Arrays.copyOfRange(bytes, 20 + xmlLength, bytes.length), CHARSET);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
 
     // appid不相同的情况
-    if (!from_appid.equals(this.appidOrCorpid)) {
+    if (!fromAppid.equals(this.appidOrCorpid)) {
       throw new RuntimeException("AppID不正确");
     }
 

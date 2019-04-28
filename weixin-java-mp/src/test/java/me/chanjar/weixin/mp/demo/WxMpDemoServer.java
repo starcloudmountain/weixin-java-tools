@@ -5,7 +5,7 @@ import me.chanjar.weixin.mp.api.WxMpConfigStorage;
 import me.chanjar.weixin.mp.api.WxMpMessageHandler;
 import me.chanjar.weixin.mp.api.WxMpMessageRouter;
 import me.chanjar.weixin.mp.api.WxMpService;
-import me.chanjar.weixin.mp.api.impl.WxMpServiceApacheHttpClientImpl;
+import me.chanjar.weixin.mp.api.impl.WxMpServiceHttpClientImpl;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -47,7 +47,7 @@ public class WxMpDemoServer {
         .fromXml(is1);
 
       wxMpConfigStorage = config;
-      wxMpService = new WxMpServiceApacheHttpClientImpl();
+      wxMpService = new WxMpServiceHttpClientImpl();
       wxMpService.setWxMpConfigStorage(config);
 
       WxMpMessageHandler logHandler = new DemoLogHandler();
@@ -58,7 +58,7 @@ public class WxMpDemoServer {
 
       wxMpMessageRouter = new WxMpMessageRouter(wxMpService);
       wxMpMessageRouter.rule().handler(logHandler).next().rule()
-        .msgType(WxConsts.XML_MSG_TEXT).matcher(guessNumberHandler)
+        .msgType(WxConsts.XmlMsgType.TEXT).matcher(guessNumberHandler)
         .handler(guessNumberHandler).end().rule().async(false).content("哈哈")
         .handler(textHandler).end().rule().async(false).content("图片")
         .handler(imageHandler).end().rule().async(false).content("oauth")

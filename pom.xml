@@ -5,12 +5,12 @@
   xmlns="http://maven.apache.org/POM/4.0.0">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.binarywang</groupId>
-  <artifactId>weixin-java-parent</artifactId>
-  <version>2.7.0</version>
+  <artifactId>wx-java</artifactId>
+  <version>3.3.0</version>
   <packaging>pom</packaging>
-  <name>WeiXin Java Tools - Parent</name>
-  <description>微信公众号、企业号上级POM</description>
-  <url>https://github.com/wechat-group/weixin-java-tools</url>
+  <name>WxJava - Weixin/Wechat Java SDK</name>
+  <description>微信开发Java SDK</description>
+  <url>https://github.com/Wechat-Group/WxJava</url>
 
   <licenses>
     <license>
@@ -80,6 +80,16 @@
       <email>crskyp@gmail.com</email>
       <url>https://github.com/crskyp</url>
     </developer>
+    <developer>
+      <name>007</name>
+      <email>007gzs@gmail.com</email>
+      <url>https://github.com/007gzs</url>
+    </developer>
+    <developer>
+      <name>Howard Liu</name>
+      <email>liuxinghao1988@gmail.com</email>
+      <url>https://github.com/howardliu-cn</url>
+    </developer>
   </developers>
 
   <scm>
@@ -94,6 +104,7 @@
     <module>weixin-java-mp</module>
     <module>weixin-java-pay</module>
     <module>weixin-java-miniapp</module>
+    <module>weixin-java-open</module>
     <!--module>weixin-java-osgi</module-->
   </modules>
 
@@ -102,10 +113,8 @@
     <maven.compiler.target>1.7</maven.compiler.target>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <downloadJavadocs>true</downloadJavadocs>
-    <downloadSources>true</downloadSources>
     <httpclient.version>4.5</httpclient.version>
-    <jetty.version>9.3.0.RC0</jetty.version>
+    <jetty.version>9.4.17.v20190418</jetty.version>
   </properties>
 
   <dependencyManagement>
@@ -162,7 +171,7 @@
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
-        <version>1.4.9</version>
+        <version>1.4.10</version>
       </dependency>
       <!-- 由于guava较新的21.0版本需要jdk8，故而此处采用较低版本 -->
       <dependency>
@@ -220,9 +229,22 @@
         <scope>test</scope>
       </dependency>
       <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-guava</artifactId>
+        <version>3.0.0</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
         <groupId>redis.clients</groupId>
         <artifactId>jedis</artifactId>
         <version>2.9.0</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>1.16.18</version>
         <scope>provided</scope>
       </dependency>
     </dependencies>
@@ -288,7 +310,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.5</version>
+            <version>1.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -343,11 +365,22 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.6.0</version>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.17</version>
         <configuration>
-          <encoding>UTF-8</encoding>
+          <configLocation>quality-checks/google_checks.xml</configLocation>
+          <includeTestSourceDirectory>true</includeTestSourceDirectory>
+          <consoleOutput>true</consoleOutput>
+          <failsOnError>true</failsOnError>
         </configuration>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

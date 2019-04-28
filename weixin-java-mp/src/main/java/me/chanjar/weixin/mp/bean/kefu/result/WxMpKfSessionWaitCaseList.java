@@ -1,15 +1,19 @@
 package me.chanjar.weixin.mp.bean.kefu.result;
 
-import com.google.gson.annotations.SerializedName;
-import me.chanjar.weixin.common.util.ToStringUtils;
-import me.chanjar.weixin.mp.util.json.WxMpGsonBuilder;
-
+import java.io.Serializable;
 import java.util.List;
+
+import com.google.gson.annotations.SerializedName;
+import lombok.Data;
+import me.chanjar.weixin.mp.util.json.WxMpGsonBuilder;
 
 /**
  * @author Binary Wang
  */
-public class WxMpKfSessionWaitCaseList {
+@Data
+public class WxMpKfSessionWaitCaseList implements Serializable {
+  private static final long serialVersionUID = 2432132626631361922L;
+
   /**
    * count 未接入会话数量
    */
@@ -23,21 +27,13 @@ public class WxMpKfSessionWaitCaseList {
   private List<WxMpKfSession> kfSessionWaitCaseList;
 
   public static WxMpKfSessionWaitCaseList fromJson(String json) {
-    return WxMpGsonBuilder.INSTANCE.create().fromJson(json,
+    return WxMpGsonBuilder.create().fromJson(json,
       WxMpKfSessionWaitCaseList.class);
   }
 
   @Override
   public String toString() {
-    return ToStringUtils.toSimpleString(this);
-  }
-
-  public List<WxMpKfSession> getKfSessionWaitCaseList() {
-    return this.kfSessionWaitCaseList;
-  }
-
-  public void setKfSessionWaitCaseList(List<WxMpKfSession> kfSessionWaitCaseList) {
-    this.kfSessionWaitCaseList = kfSessionWaitCaseList;
+    return WxMpGsonBuilder.create().toJson(this);
   }
 
 }

@@ -1,90 +1,101 @@
 package me.chanjar.weixin.mp.api;
 
+import me.chanjar.weixin.mp.enums.TicketType;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 /**
- * 基于Redis的微信配置provider
+ * 基于Redis的微信配置provider.
  *
- * @author lly835
+ * <pre>
+ *    使用说明：本实现仅供参考，并不完整，
+ *    比如为减少项目依赖，未加入redis分布式锁的实现，如有需要请自行实现。
+ * </pre>
+ *
+ * @author nickwong
  */
 @SuppressWarnings("hiding")
 public class WxMpInRedisConfigStorage extends WxMpInMemoryConfigStorage {
+  private static final String ACCESS_TOKEN_KEY = "wx:access_token:";
 
-  private final static String ACCESS_TOKEN_KEY = "wechat_access_token_";
+  /**
+   * 使用连接池保证线程安全.
+   */
+  protected final JedisPool jedisPool;
 
-  private final static String JSAPI_TICKET_KEY = "wechat_jsapi_ticket_";
+  private String accessTokenKey;
 
-  private final static String CARDAPI_TICKET_KEY = "wechat_cardapi_ticket_";
+  public WxMpInRedisConfigStorage(JedisPool jedisPool) {
+    this.jedisPool = jedisPool;
+  }
 
-  protected Jedis jedis;
+  /**
+   * 每个公众号生成独有的存储key.
+   */
+  @Override
+  public void setAppId(String appId) {
+    super.setAppId(appId);
+    this.accessTokenKey = ACCESS_TOKEN_KEY.concat(appId);
+  }
+
+  private String getTicketRedisKey(TicketType type) {
+    return String.format("wx:ticket:key:%s:%s", this.appId, type.getCode());
+  }
 
   @Override
   public String getAccessToken() {
-    return jedis.get(ACCESS_TOKEN_KEY.concat(appId));
+    try (Jedis jedis = this.jedisPool.getResource()) {
+      return jedis.get(this.accessTokenKey);
+    }
   }
 
   @Override
   public boolean isAccessTokenExpired() {
-    return jedis.ttl(ACCESS_TOKEN_KEY.concat(appId)) < 2;
+    try (Jedis jedis = this.jedisPool.getResource()) {
+      return jedis.ttl(accessTokenKey) < 2;
+    }
   }
 
   @Override
   public synchronized void updateAccessToken(String accessToken, int expiresInSeconds) {
-    jedis.set(ACCESS_TOKEN_KEY.concat(appId), accessToken);
-    jedis.expire(ACCESS_TOKEN_KEY.concat(appId), expiresInSeconds - 200);
+    try (Jedis jedis = this.jedisPool.getResource()) {
+      jedis.setex(this.accessTokenKey, expiresInSeconds - 200, accessToken);
+    }
   }
 
   @Override
   public void expireAccessToken() {
-    jedis.expire(ACCESS_TOKEN_KEY.concat(appId), 0);
+    try (Jedis jedis = this.jedisPool.getResource()) {
+      jedis.expire(this.accessTokenKey, 0);
+    }
   }
 
   @Override
-  public String getJsapiTicket() {
-    return jedis.get(JSAPI_TICKET_KEY.concat(appId));
+  public String getTicket(TicketType type) {
+    try (Jedis jedis = this.jedisPool.getResource()) {
+      return jedis.get(this.getTicketRedisKey(type));
+    }
   }
 
   @Override
-  public boolean isJsapiTicketExpired() {
-    return jedis.ttl(JSAPI_TICKET_KEY.concat(appId)) < 2;
+  public boolean isTicketExpired(TicketType type) {
+    try (Jedis jedis = this.jedisPool.getResource()) {
+      return jedis.ttl(this.getTicketRedisKey(type)) < 2;
+    }
   }
 
   @Override
-  public synchronized void updateJsapiTicket(String jsapiTicket, int expiresInSeconds) {
-    jedis.set(JSAPI_TICKET_KEY.concat(appId), jsapiTicket);
-    jedis.expire(JSAPI_TICKET_KEY.concat(appId), expiresInSeconds - 200);
+  public synchronized void updateTicket(TicketType type, String jsapiTicket, int expiresInSeconds) {
+    try (Jedis jedis = this.jedisPool.getResource()) {
+      jedis.setex(this.getTicketRedisKey(type), expiresInSeconds - 200, jsapiTicket);
+    }
   }
 
   @Override
-  public void expireJsapiTicket() {
-    jedis.expire(JSAPI_TICKET_KEY.concat(appId), 0);
+  public void expireTicket(TicketType type) {
+    try (Jedis jedis = this.jedisPool.getResource()) {
+      jedis.expire(this.getTicketRedisKey(type), 0);
+    }
   }
 
-  /**
-   * 卡券api_ticket
-   */
-  @Override
-  public String getCardApiTicket() {
-    return jedis.get(CARDAPI_TICKET_KEY.concat(appId));
-  }
-
-  @Override
-  public boolean isCardApiTicketExpired() {
-    return jedis.ttl(CARDAPI_TICKET_KEY.concat(appId)) < 2;
-  }
-
-  @Override
-  public synchronized void updateCardApiTicket(String cardApiTicket, int expiresInSeconds) {
-    jedis.set(CARDAPI_TICKET_KEY.concat(appId), cardApiTicket);
-    jedis.expire(CARDAPI_TICKET_KEY.concat(appId), expiresInSeconds - 200);
-  }
-
-  @Override
-  public void expireCardApiTicket() {
-    jedis.expire(CARDAPI_TICKET_KEY.concat(appId), 0);
-  }
-
-  public void setJedis(Jedis jedis) {
-    this.jedis = jedis;
-  }
 }

@@ -1,6 +1,8 @@
 package com.github.binarywang.wxpay.bean.request;
 
+import com.github.binarywang.wxpay.exception.WxPayException;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -16,10 +18,30 @@ import org.apache.commons.lang3.StringUtils;
  * <li>描述
  * </pre>
  *
- * @author <a href="https://github.com/binarywang">binarywang(Binary Wang)</a>
+ * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@Builder(builderMethodName = "newBuilder")
+@NoArgsConstructor
+@AllArgsConstructor
 @XStreamAlias("xml")
-public class WxPayOrderQueryRequest extends WxPayBaseRequest {
+public class WxPayOrderQueryRequest extends BaseWxPayRequest {
+
+  /**
+   * <pre>
+   * 字段名：接口版本号.
+   * 变量名：version
+   * 是否必填：单品优惠必填
+   * 类型：String(32)
+   * 示例值：1.0
+   * 描述：单品优惠新增字段，区分原接口，固定填写1.0，
+   * 查单接口上传version后查询结果才返回单品信息，不上传不返回单品信息。
+   * 更多信息，详见文档：https://pay.weixin.qq.com/wiki/doc/api/danpin.php?chapter=9_102&index=2
+   * </pre>
+   */
+  @XStreamAlias("version")
+  private String version;
 
   /**
    * <pre>
@@ -47,27 +69,11 @@ public class WxPayOrderQueryRequest extends WxPayBaseRequest {
   @XStreamAlias("out_trade_no")
   private String outTradeNo;
 
-  public String getTransactionId() {
-    return this.transactionId;
-  }
-
-  public void setTransactionId(String transactionId) {
-    this.transactionId = transactionId;
-  }
-
-  public String getOutTradeNo() {
-    return this.outTradeNo;
-  }
-
-  public void setOutTradeNo(String outTradeNo) {
-    this.outTradeNo = outTradeNo;
-  }
-
   @Override
-  protected void checkConstraints() {
+  protected void checkConstraints() throws WxPayException {
     if ((StringUtils.isBlank(transactionId) && StringUtils.isBlank(outTradeNo)) ||
       (StringUtils.isNotBlank(transactionId) && StringUtils.isNotBlank(outTradeNo))) {
-      throw new IllegalArgumentException("transaction_id 和 out_trade_no 不能同时存在或同时为空，必须二选一");
+      throw new WxPayException("transaction_id 和 out_trade_no 不能同时存在或同时为空，必须二选一");
     }
   }
 }

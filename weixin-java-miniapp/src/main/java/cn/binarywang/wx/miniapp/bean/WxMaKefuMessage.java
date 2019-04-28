@@ -1,95 +1,106 @@
 package cn.binarywang.wx.miniapp.bean;
 
-import cn.binarywang.wx.miniapp.builder.ImageBuilder;
-import cn.binarywang.wx.miniapp.builder.TextBuilder;
+import cn.binarywang.wx.miniapp.builder.ImageMessageBuilder;
+import cn.binarywang.wx.miniapp.builder.LinkMessageBuilder;
+import cn.binarywang.wx.miniapp.builder.MaPageMessageBuilder;
+import cn.binarywang.wx.miniapp.builder.TextMessageBuilder;
 import cn.binarywang.wx.miniapp.util.json.WxMaGsonBuilder;
+import com.google.gson.annotations.SerializedName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 
 import java.io.Serializable;
 
 /**
- * 客服消息
+ * 客服消息.
  *
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
+@Data
 public class WxMaKefuMessage implements Serializable {
   private static final long serialVersionUID = -9196732086954365246L;
 
+  @SerializedName("touser")
   private String toUser;
+
+  @SerializedName("msgtype")
   private String msgType;
-  private String content;
-  private String mediaId;
-  private String thumbMediaId;
-  private String title;
-  private String description;
 
-  /**
-   * 获得文本消息builder
-   */
-  public static TextBuilder TEXT() {
-    return new TextBuilder();
+  @SerializedName("text")
+  private KfText text;
+
+  @SerializedName("image")
+  private KfImage image;
+
+  @SerializedName("link")
+  private KfLink link;
+
+  @SerializedName("miniprogrampage")
+  private KfMaPage maPage;
+
+  @Data
+  @AllArgsConstructor
+  public static class KfText {
+    private String content;
+  }
+
+  @Data
+  @AllArgsConstructor
+  public static class KfImage {
+    @SerializedName("media_id")
+    private String mediaId;
+  }
+
+  @Data
+  @Builder
+  public static class KfLink {
+    private String title;
+    private String description;
+    private String url;
+
+    @SerializedName("thumb_url")
+    private String thumbUrl;
+  }
+
+  @Data
+  @Builder
+  public static class KfMaPage {
+    private String title;
+
+    @SerializedName("pagepath")
+    private String pagePath;
+
+    @SerializedName("thumb_media_id")
+    private String thumbMediaId;
   }
 
   /**
-   * 获得图片消息builder
+   * 获得文本消息builder.
    */
-  public static ImageBuilder IMAGE() {
-    return new ImageBuilder();
+  public static TextMessageBuilder newTextBuilder() {
+    return new TextMessageBuilder();
   }
 
-  public String getToUser() {
-    return this.toUser;
+  /**
+   * 获得图片消息builder.
+   */
+  public static ImageMessageBuilder newImageBuilder() {
+    return new ImageMessageBuilder();
   }
 
-  public void setToUser(String toUser) {
-    this.toUser = toUser;
+  /**
+   * 获得图文链接消息builder.
+   */
+  public static LinkMessageBuilder newLinkBuilder() {
+    return new LinkMessageBuilder();
   }
 
-  public String getMsgType() {
-    return this.msgType;
-  }
-
-  public void setMsgType(String msgType) {
-    this.msgType = msgType;
-  }
-
-  public String getContent() {
-    return this.content;
-  }
-
-  public void setContent(String content) {
-    this.content = content;
-  }
-
-  public String getMediaId() {
-    return this.mediaId;
-  }
-
-  public void setMediaId(String mediaId) {
-    this.mediaId = mediaId;
-  }
-
-  public String getThumbMediaId() {
-    return this.thumbMediaId;
-  }
-
-  public void setThumbMediaId(String thumbMediaId) {
-    this.thumbMediaId = thumbMediaId;
-  }
-
-  public String getTitle() {
-    return this.title;
-  }
-
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  public String getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
+  /**
+   * 获得图文链接消息builder.
+   */
+  public static MaPageMessageBuilder newMaPageBuilder() {
+    return new MaPageMessageBuilder();
   }
 
   public String toJson() {

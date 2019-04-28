@@ -3,14 +3,14 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <artifactId>weixin-java-parent</artifactId>
     <groupId>com.github.binarywang</groupId>
-    <version>2.7.0</version>
+    <artifactId>wx-java</artifactId>
+    <version>3.3.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>weixin-java-pay</artifactId>
-  <name>WeiXin Java Tools - PAY</name>
+  <name>WxJava - PAY</name>
   <description>微信支付 Java SDK</description>
 
   <dependencies>
@@ -23,9 +23,27 @@
       <groupId>com.github.binarywang</groupId>
       <artifactId>qrcode-utils</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.jodd</groupId>
       <artifactId>jodd-http</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>1.9.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpkix-jdk15on</artifactId>
+      <version>1.59</version>
     </dependency>
 
     <dependency>
@@ -39,9 +57,18 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-guava</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
   </dependencies>
 

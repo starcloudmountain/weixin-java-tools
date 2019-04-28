@@ -5,9 +5,8 @@ import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;
 import jodd.http.ProxyInfo;
 import jodd.util.StringPool;
-
-import me.chanjar.weixin.common.bean.result.WxError;
-import me.chanjar.weixin.common.exception.WxErrorException;
+import me.chanjar.weixin.common.error.WxError;
+import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.http.RequestHttp;
 import me.chanjar.weixin.common.util.http.SimplePostRequestExecutor;
 
@@ -40,9 +39,8 @@ public class JoddHttpSimplePostRequestExecutor extends SimplePostRequestExecutor
 
     String responseContent = response.bodyText();
     if (responseContent.isEmpty()) {
-      throw new WxErrorException(
-        WxError.newBuilder().setErrorCode(9999).setErrorMsg("无响应内容")
-          .build());
+      throw new WxErrorException(WxError.builder().errorCode(9999).errorMsg("无响应内容")
+        .build());
     }
 
     if (responseContent.startsWith("<xml>")) {

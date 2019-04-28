@@ -1,10 +1,10 @@
 package me.chanjar.weixin.cp.config;
 
-import me.chanjar.weixin.common.bean.WxAccessToken;
-import me.chanjar.weixin.common.util.ToStringUtils;
-import me.chanjar.weixin.common.util.http.apache.ApacheHttpClientBuilder;
-
 import java.io.File;
+
+import me.chanjar.weixin.common.bean.WxAccessToken;
+import me.chanjar.weixin.common.util.http.apache.ApacheHttpClientBuilder;
+import me.chanjar.weixin.cp.util.json.WxCpGsonBuilder;
 
 /**
  * 基于内存的微信配置provider，在实际生产环境中应该将这些配置持久化
@@ -63,7 +63,7 @@ public class WxCpInMemoryConfigStorage implements WxCpConfigStorage {
   @Override
   public synchronized void updateAccessToken(String accessToken, int expiresInSeconds) {
     this.accessToken = accessToken;
-    this.expiresTime = System.currentTimeMillis() + (expiresInSeconds - 200) * 1000l;
+    this.expiresTime = System.currentTimeMillis() + (expiresInSeconds - 200) * 1000L;
   }
 
   @Override
@@ -92,7 +92,7 @@ public class WxCpInMemoryConfigStorage implements WxCpConfigStorage {
   public synchronized void updateJsapiTicket(String jsapiTicket, int expiresInSeconds) {
     this.jsapiTicket = jsapiTicket;
     // 预留200秒的时间
-    this.jsapiTicketExpiresTime = System.currentTimeMillis() + (expiresInSeconds - 200) * 1000l;
+    this.jsapiTicketExpiresTime = System.currentTimeMillis() + (expiresInSeconds - 200) * 1000L;
   }
 
   @Override
@@ -201,7 +201,7 @@ public class WxCpInMemoryConfigStorage implements WxCpConfigStorage {
 
   @Override
   public String toString() {
-    return ToStringUtils.toSimpleString(this);
+    return WxCpGsonBuilder.create().toJson(this);
   }
 
   @Override

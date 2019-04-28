@@ -1,15 +1,19 @@
 package me.chanjar.weixin.mp.bean.kefu.result;
 
-import com.google.gson.annotations.SerializedName;
-import me.chanjar.weixin.common.util.ToStringUtils;
-import me.chanjar.weixin.mp.util.json.WxMpGsonBuilder;
-
+import java.io.Serializable;
 import java.util.List;
+
+import com.google.gson.annotations.SerializedName;
+import lombok.Data;
+import me.chanjar.weixin.mp.util.json.WxMpGsonBuilder;
 
 /**
  * @author Binary Wang
  */
-public class WxMpKfSessionList {
+@Data
+public class WxMpKfSessionList implements Serializable {
+  private static final long serialVersionUID = -7680371346226640206L;
+
   /**
    * 会话列表
    */
@@ -17,20 +21,13 @@ public class WxMpKfSessionList {
   private List<WxMpKfSession> kfSessionList;
 
   public static WxMpKfSessionList fromJson(String json) {
-    return WxMpGsonBuilder.INSTANCE.create().fromJson(json,
+    return WxMpGsonBuilder.create().fromJson(json,
       WxMpKfSessionList.class);
   }
 
   @Override
   public String toString() {
-    return ToStringUtils.toSimpleString(this);
+    return WxMpGsonBuilder.create().toJson(this);
   }
 
-  public List<WxMpKfSession> getKfSessionList() {
-    return this.kfSessionList;
-  }
-
-  public void setKfSessionList(List<WxMpKfSession> kfSessionList) {
-    this.kfSessionList = kfSessionList;
-  }
 }
